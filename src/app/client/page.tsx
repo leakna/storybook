@@ -41,7 +41,7 @@ const Client = () => {
 
   // Error handling
   if (error) {
-    throw new Error("something is wrong")
+    throw new Error("smething is wrong")
   }
 
   return (
