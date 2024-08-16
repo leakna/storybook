@@ -9,8 +9,9 @@
     "lint": "next lint",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test-storybook": "test-storybook",
-    "serve-storybook": "serve storybook-static"
+    "build-storybook": "build-storybook -o storybook-static"
+    
+
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
