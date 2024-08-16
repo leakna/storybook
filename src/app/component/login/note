@@ -1,0 +1,80 @@
+import { http, HttpResponse, delay } from 'msw';
+import { Meta, StoryObj } from '@storybook/react';
+import { expect, userEvent, waitFor, within } from '@storybook/test';
+import SignIn from './loginForm';
+
+const meta: Meta<typeof SignIn> = {
+  title: 'request/signin',
+  component: SignIn,
+};
+
+export default meta;
+type Story = StoryObj<typeof SignIn>;
+
+// Mocked data
+const TestData = [
+  {
+    email: 'leakna@gmail.com',
+    password: '12345678',
+  },
+  {
+    email: 'test@gmail.com',
+    password: '654321',
+  },
+];
+
+export const MockedSuccess: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.get('https://your-restful-endpoint', () => {
+          return HttpResponse.json(TestData);
+        }),
+      ],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Simulate interactions with the component
+    await userEvent.type(canvas.getByTestId('email'), 'leakna@gmail.com');
+    await userEvent.type(canvas.getByTestId('password'), '12345678');
+    await userEvent.click(canvas.getByRole('button'));
+
+    // Assert DOM structure for success message
+    await waitFor(() => {
+      // Use a more specific query if needed
+      const successMessage = canvas.queryByText('SignIn Success');
+      expect(successMessage).toBeInTheDocument();
+    });
+  },
+};
+
+export const MockedError: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.get('https://your-restful-endpoint', async () => {
+          await delay(800);
+          return new HttpResponse(null, {
+            status: 403,
+          });
+        }),
+      ],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await userEvent.type(canvas.getByTestId('email'), 'wrongemail@gmail.com');
+    await userEvent.type(canvas.getByTestId('password'), 'wrongpassword');
+    await userEvent.click(canvas.getByRole('button'));
+
+    // Assert DOM structure for error message
+    await waitFor(() => {
+      // Use a more specific query if needed
+      const errorMessage = canvas.queryByText('SignIn Unsuccessful');
+      expect(errorMessage).toBeInTheDocument();
+    });
+  },
+};
